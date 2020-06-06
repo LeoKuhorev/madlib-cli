@@ -1,7 +1,7 @@
 import os
 
 
-TEMPLATE_PATH = 'template.txt'
+TEMPLATE_PATH = 'madlib_cli/template.txt'
 user_answers = {
     'adjectives': {
         'message': 'an Adjective',
@@ -48,12 +48,16 @@ def read_template(template_path):
 
 
 def get_user_answers():
-    for key, value in user_answers.items():
-        if type(value['value']) == list:
-            for val in value['value']:
-                print(f'Please enter {value["message"]} and press enter')
+    for answer in user_answers.values():
+        if type(answer['value']) == list:
+            total = len(answer['value'])
+            for i in range(total):
+                print(
+                    f'Please enter {answer["message"]} and press enter ({i}/{total} entered)')
+                answer['value'][i] = input()
         else:
-            print(f'Please enter {value["message"]} and press enter')
+            print(f'Please enter {answer["message"]} and press enter')
+            answer['value'] = input()
 
 
 def prepare_template(template):
