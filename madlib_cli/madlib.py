@@ -1,116 +1,56 @@
 import os
+import re
 
 
 TEMPLATE_PATH = 'madlib_cli/template.txt'
-user_answers = {
-    'adjectives': {
-        'message': 'an Adjective',
-        'value': [''] * 6},
-    'first_name': {
-        'message': 'First Name',
-        'value': ''},
-    'past_tense_verb': {
-        'message': 'a Past Tense Verb',
-        'value': ''},
-    'plural_nouns': {
-        'message': 'a Plural Noun',
-        'value': [''] * 5},
-    'large_animal': {
-        'message': 'a Large Animal',
-        'value': ''},
-    'small_animal': {
-        'message': 'a Small Animal',
-        'value': ''},
-    'girls_name': {
-        'message': 'a Girl\'s name',
-        'value': ''},
-    'numbers': {
-        'message': 'a number',
-        'value': [None] * 3},
-}
+SAVE_TO_PATH = 'madlib_cli/result.txt'
 
 
-def print_welcome():
-    print('welcome user, here are the rules')
-
-
-def read_template(template_path):
-    if os.path.exists(template_path):
+def read_file(file_path):
+    if os.path.exists(file_path):
         try:
-            with open(template_path, 'r') as t_file:
-                new_template = t_file.read()
+            with open(file_path, 'r') as f:
+                new_template = f.read()
         except IOError:
-            print(f'Could\'t read the file {template_path}')
+            print(f'Could\'t read the file {file_path}')
+            return False
         else:
             return new_template
     else:
-        print(f'File {template_path} doesn\'t exist')
+        print(f'File {file_path} doesn\'t exist')
+        return False
 
 
-def get_user_answers():
-    for answer in user_answers.values():
-        if type(answer['value']) == list:
-            total = len(answer['value'])
-            for i in range(total):
-                print(
-                    f'Please enter {answer["message"]} and press enter ({i}/{total} entered)')
-                answer['value'][i] = input()
-        else:
-            print(f'Please enter {answer["message"]} and press enter')
-            answer['value'] = input()
+def save_result(text, file_path):
+    with open(file_path, 'w') as f:
+        f.write(text)
 
 
-def prepare_template(template):
-    # Replace adjectives with user input values
-    for i in range(len(user_answers['adjectives']['value'])):
-        template = template.replace(
-            '{Adjective}', f'{user_answers["adjectives"]["value"][i]}', 1)
+def get_user_answers(questions):
+    answers = []
+    total = len(questions)
+    for i in range(total):
+        print(
+            f'Please type {questions[i]} and press enter to submit ({i}/{total} answered)')
+        answers.append(input())
+    return answers
 
-    # Replace first name
-    template = template.replace(
-        '{A First Name}', f'{user_answers["first_name"]["value"]}', 2)
 
-    template = template.replace(
-        "{First Name's}", f'{user_answers["first_name"]["value"]}\'s')
-
-    # Replace Past Tense Verb
-    template = template.replace(
-        "{Past Tense Verb}", f'{user_answers["past_tense_verb"]["value"]}')
-
-    # Replace Plural Noun
-    for i in range(len(user_answers['plural_nouns']['value'])):
-        template = template.replace(
-            '{Plural Noun}', f'{user_answers["plural_nouns"]["value"][i]}', 1)
-
-    # Replace Large Animal
-    template = template.replace(
-        "{Large Animal}", f'{user_answers["large_animal"]["value"]}')
-
-    # Replace Small Animal
-    template = template.replace(
-        "{Small Animal}", f'{user_answers["small_animal"]["value"]}')
-
-    # Replace Girl's Name
-    template = template.replace(
-        "{A Girl's Name}", f'{user_answers["girls_name"]["value"]}')
-
-    # Replace Numbers
-    template = template.replace(
-        "{Number 1-50}", f'{user_answers["numbers"]["value"][0]}')
-
-    for i in range(1, len(user_answers['numbers']['value'])):
-        template = template.replace(
-            '{Number}', f'{user_answers["numbers"]["value"][i]}', 1)
-
+def replace_words(pattern, content, template):
+    for word in content:
+        template = re.sub(pattern, word, template)
     return template
 
 
 def run_game():
-    print_welcome()
-    get_user_answers()
-    template = read_template(TEMPLATE_PATH)
-    template = prepare_template(template)
-    print(template)
+    print('Welcome!')
+    template = read_file(TEMPLATE_PATH)
+    if template:
+        words_to_replace = re.findall('{([^\}]*)}', template)
+        answers = get_user_answers(words_to_replace)
+        template = replace_words('{[^\}]*}', answers, template)
+        save_result(template, SAVE_TO_PATH)
+        print(template)
 
 
 if __name__ == "__main__":
