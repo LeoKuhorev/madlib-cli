@@ -45,3 +45,5 @@ Then select and open `malib.py`
 ### Change Log
 
 1.0: _Added basic functionality_ - 06/06/2020
+
+[Link to PR](https://github.com/LeoKuhorev/madlib-cli/pull/2)
